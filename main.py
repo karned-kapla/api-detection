@@ -26,7 +26,7 @@ async def detect_objects(file: UploadFile):
                     "xmax": float(box.xyxy[0][2]),
                     "ymax": float(box.xyxy[0][3]),
                     "confidence": float(box.conf[0]),
-                    "class": int(box.cls[0]),
+                    "predicted_class": int(box.cls[0]),
                     "name": model.names[int(box.cls[0])]
                 })
     datas["shape"] = image.shape
