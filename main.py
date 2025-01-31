@@ -1,35 +1,21 @@
 from fastapi import FastAPI, File, UploadFile
-import cv2
-import numpy as np
-from ultralytics import YOLO
+from src.yolo_detection import prediction, uri_file_prediction, url_file_prediction
 
-model = YOLO("models/yolo11l.pt")
 app = FastAPI()
 
 
-@app.post("/")
-async def detect_objects(file: UploadFile):
+@app.post("/file")
+async def detect_objects(file: UploadFile, model_name: str = "yolo11l"):
     image_bytes = await file.read()
-    image = np.frombuffer(image_bytes, dtype=np.uint8)
-    image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+    result = prediction(image_bytes, model_name)
+    return result
 
-    results = model.predict(image)
+@app.post("/uri")
+async def detect_objects_uri(uri: str, model_name: str = "yolo11l"):
+    result = uri_file_prediction(uri, model_name)
+    return result
 
-    datas = {}
-    detections = []
-    for result in results:
-        for box in result.boxes:
-            if box.conf[0] > 0.5:
-                detections.append({
-                    "xmin": float(box.xyxy[0][0]),
-                    "ymin": float(box.xyxy[0][1]),
-                    "xmax": float(box.xyxy[0][2]),
-                    "ymax": float(box.xyxy[0][3]),
-                    "confidence": float(box.conf[0]),
-                    "predicted_class": int(box.cls[0]),
-                    "name": model.names[int(box.cls[0])]
-                })
-    datas["shape"] = image.shape
-    datas["boxes"] = detections
-    datas["speed"] = results[0].speed
-    return {"detection": datas}
+@app.post("/url")
+async def detect_objects_url(url: str, model_name: str = "yolo11l"):
+    result = url_file_prediction(url, model_name)
+    return result
