@@ -1,3 +1,5 @@
+import logging
+
 import requests
 from fastapi import HTTPException
 from google.cloud import storage
@@ -7,12 +9,24 @@ from ultralytics import YOLO
 import cv2
 import numpy as np
 
-from src.models.output import Box, DetectionResult
+from src.models.output import Box, ClassInfo, DetectionResult
 
 
 def load_model(model_name: str) -> YOLO:
-    model = YOLO(f"models/{model_name}.pt")
-    return model
+    return YOLO(f"models/{model_name}.pt")
+
+def get_model_classes(model_name: str) -> list:
+    model = load_model(model_name)
+
+    if not isinstance(model.names, dict):
+        raise HTTPException(status_code=500, detail="Le modèle ne contient pas de noms de classes valides.")
+
+    classes = [
+        ClassInfo(id=class_id, name=class_name)
+        for class_id, class_name in model.names.items()
+    ]
+
+    return classes
 
 def add_shape(image: np.ndarray, datas: dict) -> dict:
     datas["shape"] = image.shape
