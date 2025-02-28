@@ -1,7 +1,11 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, UploadFile
 from src.yolo_detection import prediction, uri_file_prediction, url_file_prediction
 
-app = FastAPI()
+app = FastAPI(
+    title="API Object Detection",
+    version="1.0.0",
+    description="Détection d'objets dans une image en utilisant un modèle YOLO (prédéfini ou personnalisé)",
+)
 
 
 @app.post("/file")
