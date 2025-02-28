@@ -1,4 +1,4 @@
-import logging
+from typing import Dict, List
 
 import requests
 from fastapi import HTTPException
@@ -9,7 +9,7 @@ from ultralytics import YOLO
 import cv2
 import numpy as np
 
-from src.models.output import Box, ClassInfo, DetectionResult
+from src.models.output import Box, ClassInfo, ClassReport, DetectionResult
 
 
 def load_model(model_name: str) -> YOLO:
@@ -36,7 +36,7 @@ def add_speed(results: list, datas: dict) -> dict:
     datas["speed"] = results[0].speed
     return datas
 
-def add_detections(model: YOLO, results: list, datas: dict) -> dict:
+def add_boxes(model: YOLO, results: list, datas: dict) -> dict:
     detections = []
     for result in results:
         for box in result.boxes:
@@ -55,11 +55,32 @@ def add_detections(model: YOLO, results: list, datas: dict) -> dict:
     datas["boxes"] = detections
     return datas
 
+
+def add_classes( model: YOLO, results: list, datas: dict) -> dict:
+    classes = {}
+    for result in results:
+        for box in result.boxes:
+            if box.conf[0] > 0.5:
+                class_id = int(box.cls[0])
+                class_name = model.names[class_id]
+
+                if class_id not in classes:
+                    classes[class_id] = {
+                        "class_name": class_name,
+                        "count": 0
+                    }
+
+                classes[class_id]["count"] += 1
+    datas["classes"] = classes
+    return datas
+
+
 def construct_datas(model: YOLO, results: list, image: np.ndarray) -> dict:
     datas = {}
     datas = add_shape(image=image, datas=datas)
     datas = add_speed(results=results, datas=datas)
-    datas = add_detections(model=model, results=results, datas=datas)
+    datas = add_boxes(model=model, results=results, datas=datas)
+    datas = add_classes(model=model, results=results, datas=datas)
     return datas
 
 def treat_image(image_bytes: bytes) -> np.ndarray:
@@ -115,7 +136,8 @@ def prediction(image_bytes: bytes, model_name: str) -> DetectionResult:
     detection_result = DetectionResult(
         shape=datas["shape"],
         speed=datas["speed"],
-        boxes=[Box(**box) for box in datas["boxes"]]
+        boxes=datas["boxes"],
+        classes=datas["classes"]
     )
 
     return detection_result
