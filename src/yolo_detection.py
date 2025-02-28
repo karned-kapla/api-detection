@@ -7,6 +7,9 @@ from ultralytics import YOLO
 import cv2
 import numpy as np
 
+from src.models.output import Box, DetectionResult
+
+
 def load_model(model_name: str) -> YOLO:
     model = YOLO(f"models/{model_name}.pt")
     return model
@@ -89,17 +92,24 @@ def download_image_from_s3( s3_uri: str ) -> bytes:
         raise HTTPException(status_code=500, detail=f"Erreur lors de la récupération de l'image : {str(e)}")
 
 
-def prediction(image_bytes: bytes, model_name: str) -> dict:
+def prediction(image_bytes: bytes, model_name: str) -> DetectionResult:
     image = treat_image(image_bytes)
     model = load_model(model_name)
     results = model.predict(image)
     datas = construct_datas(model=model, results=results, image=image)
-    return datas
 
-def uri_file_prediction(uri: str, model_name: str) -> dict:
+    detection_result = DetectionResult(
+        shape=datas["shape"],
+        speed=datas["speed"],
+        boxes=[Box(**box) for box in datas["boxes"]]
+    )
+
+    return detection_result
+
+def uri_file_prediction(uri: str, model_name: str) -> DetectionResult:
     image_bytes = download_image_from_bucket(uri)
     return prediction(image_bytes, model_name)
 
-def url_file_prediction(url: str, model_name: str) -> dict:
+def url_file_prediction(url: str, model_name: str) -> DetectionResult:
     image_bytes = requests.get(url).content
     return prediction(image_bytes, model_name)
