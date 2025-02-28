@@ -10,38 +10,42 @@ json_input = st.text_area("Collez le JSON des détections ici")
 
 if uploaded_image and json_input:
     try:
-
-        image = np.array(Image.open(uploaded_image))
-
+        # Charger l'image
+        image = Image.open(uploaded_image)
         detections = json.loads(json_input)
 
-        if "detection" in detections and "boxes" in detections["detection"]:
+        # Vérification de la structure du JSON
+        if "boxes" not in detections:
+            st.error("Le JSON ne contient pas de clé 'boxes'.")
+        else:
+            boxes = detections["boxes"]
+            speed = detections.get("speed", {})
 
-            boxes = detections["detection"]["boxes"]
-            speed = detections["detection"].get("speed", {})
-
+            # Affichage des informations de vitesse
             st.subheader("Informations sur la vitesse :")
-            st.write(f"- Pré-traitement : {speed.get('preprocess', 'N/A')} ms")
-            st.write(f"- Inférence : {speed.get('inference', 'N/A')} ms")
-            st.write(f"- Post-traitement : {speed.get('postprocess', 'N/A')} ms")
+            st.write(f"- **Pré-traitement** : {speed.get('preprocess', 'N/A')} ms")
+            st.write(f"- **Inférence** : {speed.get('inference', 'N/A')} ms")
+            st.write(f"- **Post-traitement** : {speed.get('postprocess', 'N/A')} ms")
 
-            image_with_boxes = Image.fromarray(image)
+            # Dessiner les boîtes sur l'image
+            image_with_boxes = image.copy()
             draw = ImageDraw.Draw(image_with_boxes)
 
             for box in boxes:
-                xmin = int(box["xmin"])
-                ymin = int(box["ymin"])
-                xmax = int(box["xmax"])
-                ymax = int(box["ymax"])
-                confidence = box.get("confidence", 0.0)
+                xmin = round(box["xmin"])
+                ymin = round(box["ymin"])
+                xmax = round(box["xmax"])
+                ymax = round(box["ymax"])
+                confidence = round(box.get("confidence", 0.0), 2)
                 label = box.get("name", "Unknown")
 
+                # Dessiner la boîte et ajouter le texte
                 draw.rectangle([xmin, ymin, xmax, ymax], outline="red", width=3)
-                draw.text((xmin, ymin), f"{label} ({confidence:.2f})", fill="red")
+                draw.text((xmin, ymin), f"{label} ({confidence})", fill="red")
 
+            # Afficher l'image modifiée
             st.image(image_with_boxes, caption="Image avec détections", use_column_width=True)
-        else:
-            st.error("Le JSON ne contient pas de clé 'detection' ou 'boxes'.")
+
     except json.JSONDecodeError:
         st.error("Le JSON fourni est invalide.")
     except Exception as e:
