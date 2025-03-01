@@ -1,5 +1,3 @@
-from typing import Dict, List
-
 import requests
 from fastapi import HTTPException
 from google.cloud import storage
