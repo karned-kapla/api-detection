@@ -26,6 +26,7 @@ def treat_url(payload: UrlInput) -> SendResponse:
         'uuid_credentials': uuid_credentials
     }
     producer.send_message(topic, message)
+    logging.info(f"Message envoyé sur {topic}")
 
     response = SendResponse(
         status="transmitted",

@@ -3,7 +3,7 @@
 références : https://www.ultralytics.com/fr/yolo
 models: https://docs.ultralytics.com/models/
 
-Cette API a pour but de faire de la détection d'objet dans une image. Elle va analyser l'image en utilisaant un modèle 
+Cette API a pour but de faire de la détection d'objet dans une image. Elle va analyser l'image en utilisant un modèle 
 basé sur Yolo et retourner un JSON avec les informations des objets détectés.  
 
 Les boxes sont les coordonnées des objets détectés dans l'image.  
@@ -50,3 +50,9 @@ Les boxes sont les coordonnées des objets détectés dans l'image.
 ```
 
 ![demo.png](docs/artefacts/demo.png)
+
+Les données ne sont pas renvoyées directement. 
+Lors de la prédiction un UUID est renvoyé pour permettre ultérieurement de récupérer les données.
+Un topic Kafka est utilisé pour désynchroniser la récupération des données.
+
+![api_object_detection_v2_eda.png](docs/api_object_detection_v2_eda.png)
