@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
-from routers.v1 import router as router_v1
-from routers.v2 import router as router_v2
+from src.routers.v1 import router as router_v1
+from src.routers.v2 import router as router_v2
 
 app = FastAPI(
     title="API Object Detection",

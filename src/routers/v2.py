@@ -24,7 +24,7 @@ async def api_detect_objects_uri( payload: UriInput ) -> DetectionResult:
 
 @router.post("/url")
 async def api_detect_objects_url( payload: UrlInput ) -> None:
-    send_message('new', {'url': str(payload.url), 'model_name': payload.model_name})
+    send_message('object-detection', {'url': str(payload.url), 'model_name': payload.model_name})
 
 
 @router.get("/model/{model_name}/classes")
