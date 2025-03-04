@@ -1,7 +1,11 @@
+import logging
+
 from fastapi import FastAPI
 
 from src.routers.v1 import router as router_v1
 from src.routers.v2 import router as router_v2
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 app = FastAPI(
     title="API Object Detection",

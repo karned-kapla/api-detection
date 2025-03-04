@@ -1,10 +1,9 @@
-from fastapi import APIRouter, HTTPException, UploadFile
-import base64
+from fastapi import APIRouter
 
-from src.functions.kafka import send_message
-from src.models.input import FileInput, ModelInput, UriInput, UrlInput
-from src.models.output import ClassInfo, DetectionResult
-from src.yolo_detection import get_model_classes, prediction, uri_file_prediction, url_file_prediction
+from src.models.input import UriInput, UrlInput
+from src.models.output import ClassInfo, SendResponse
+from src.treat import treat_url
+from src.yolo_detection import get_model_classes
 
 
 API_TAG_NAME = "object-detection"
@@ -17,14 +16,9 @@ router = APIRouter(
 )
 
 
-@router.post("/uri")
-async def api_detect_objects_uri( payload: UriInput ) -> DetectionResult:
-    return uri_file_prediction(payload.uri, payload.model_name)
-
-
 @router.post("/url")
-async def api_detect_objects_url( payload: UrlInput ) -> None:
-    send_message('object-detection', {'url': str(payload.url), 'model_name': payload.model_name})
+async def api_detect_objects_url( payload: UrlInput ) -> SendResponse:
+    return treat_url(payload)
 
 
 @router.get("/model/{model_name}/classes")

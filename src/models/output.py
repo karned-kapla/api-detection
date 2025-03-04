@@ -28,3 +28,8 @@ class DetectionResult(BaseModel):
 class ClassInfo(BaseModel):
     id: int
     name: str
+
+class SendResponse(BaseModel):
+    status: str
+    message: str
+    uuid: str
