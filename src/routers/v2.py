@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from src.models.input import UriInput, UrlInput
+from src.models.input import UrlInput
 from src.models.output import ClassInfo, SendResponse
 from src.treat import treat_url
 from src.yolo_detection import get_model_classes
