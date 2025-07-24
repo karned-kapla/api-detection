@@ -1,52 +1,42 @@
-# api-object-detection
+# api-detection
 
-références : https://www.ultralytics.com/fr/yolo
-models: https://docs.ultralytics.com/models/
+## Description
+Simple API to manage detections.
 
-Cette API a pour but de faire de la détection d'objet dans une image. Elle va analyser l'image en utilisaant un modèle 
-basé sur Yolo et retourner un JSON avec les informations des objets détectés.  
-
-Les boxes sont les coordonnées des objets détectés dans l'image.  
-
-```
-{
-  "shape": [
-    1200,
-    1600,
-    3
-  ],
-  "speed": {
-    "preprocess": 2.7320384979248047,
-    "inference": 173.2931137084961,
-    "postprocess": 0.6909370422363281
-  },
-  "boxes": [
-    {
-      "xmin": 895.2835083007812,
-      "ymin": 568.5946044921875,
-      "xmax": 1184.856689453125,
-      "ymax": 872.2315063476562,
-      "confidence": 0.9305744767189026,
-      "predicted_class": 14,
-      "name": "bird"
-    },
-    {
-      "xmin": 607.6286010742188,
-      "ymin": 551.6298828125,
-      "xmax": 974.4431762695312,
-      "ymax": 988.2098388671875,
-      "confidence": 0.9220243692398071,
-      "predicted_class": 14,
-      "name": "bird"
-    }
-  ],
-  "classes": {
-    "14": {
-      "class_name": "bird",
-      "count": 2
-    }
-  }
-}
+## Requirements
+Install requirements:
+```bash
+pip install -r requirements.txt
 ```
 
-![demo.png](docs/artefacts/demo.png)
+## Docs
+Visit [url]/docs to see the API documentation.
+
+## References
+https://fastapi.tiangolo.com/fr/tutorial/first-steps/
+
+## lancer l'API en local
+```sh
+docker run -d \
+--name api-detection \
+-p 8000:8000 \
+-v $(pwd):/app \
+-e KEYCLOAK_HOST=https://iam.karned.bzh \
+-e KEYCLOAK_REALM=Karned \
+-e KEYCLOAK_CLIENT_ID=karned \
+-e KEYCLOAK_CLIENT_SECRET=chut! \
+-e REDIS_HOST=redis \
+-e REDIS_PORT=6379 \
+-e REDIS_DB=0 \
+-e REDIS_PASSWORD=chut! \
+killiankopp/api-detection:latest
+```
+`
+## lancer un MongoDB en local
+```sh 
+docker run -d \
+--name mongodb-api-detection \
+-p 27017:27017 \
+-v ./_mongo_data:/data/db \
+mongo
+```

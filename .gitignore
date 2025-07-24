@@ -1,4 +1,5 @@
 .idea
+.venv
 .vscode
-/models
-/artefacts
+.DS_Store
+.dev
