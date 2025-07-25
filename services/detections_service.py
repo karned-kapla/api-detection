@@ -1,13 +1,10 @@
 from fastapi import HTTPException
-from config import KAFKA_TOPIC
+from config import KAFKA_TOPIC, URL_API_GATEWAY
 from models.detection_model import DetectionCreate, DetectionCreateDatabase, DetectionRead, DetectionUpdate
 from common_api.utils.v0 import get_state_repos
 from utils.kafka_util import KafkaProducer
 import secrets
 import string
-
-from common_api.services.v0 import Logger
-logger = Logger()
 
 def generate_secret(length=32):
     alphabet = string.ascii_letters + string.digits  # a-zA-Z0-9
@@ -34,7 +31,11 @@ def service_create_detection(request, detection: DetectionCreate) -> str:
                 "uuid": detection_uuid,
                 "secret": detection.secret,
                 "url": str(detection.url),
-                "model": detection.model
+                "model": detection.model,
+                "response": {
+                    "canal": "api",
+                    "url": f"http://karned-api-detection:8000/detection/v1/tasks/results"
+                }
             }
         )
     except Exception as e:
@@ -62,10 +63,6 @@ def service_update_detection(request, detection_update: DetectionUpdate) -> None
 
         if not existing_detection:
             raise HTTPException(status_code=404, detail="Detection not found")
-
-        logger.info(f"UUID : {existing_detection.get('uuid')}")
-        logger.info(f"Initial : {existing_detection.get('secret')}")
-        logger.info(f"Update : {detection_update.secret}")
 
         if existing_detection.get('secret') is None or existing_detection.get('secret') == "":
             raise HTTPException(status_code=403, detail="Secret is required for update")

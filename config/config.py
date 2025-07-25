@@ -5,7 +5,7 @@ API_NAME = os.environ.get('API_NAME', 'api-detection')
 API_TAG_NAME = os.environ.get('API_TAG_NAME', 'detections')
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 URL_API_GATEWAY = os.environ.get('URL_API_GATEWAY', 'http://localhost:8000')
-UNPROTECTED_PATHS = ['/favicon.ico', '/docs', '/detection/openapi.json', 'detection/v1/tasks/results']
+UNPROTECTED_PATHS = ['/favicon.ico', '/docs', '/detection/openapi.json', '/detection/v1/tasks/results']
 UNLICENSED_PATHS = []
 
 # Keycloak Configuration
