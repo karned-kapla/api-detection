@@ -7,6 +7,7 @@ LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 URL_API_GATEWAY = os.environ.get('URL_API_GATEWAY', 'http://localhost:8000')
 UNPROTECTED_PATHS = ['/favicon.ico', '/docs', '/detection/openapi.json', '/detection/v1/tasks/results']
 UNLICENSED_PATHS = []
+MS_SECRET_TTL = os.environ.get("MS_SECRET_TTL", 3600)
 
 # Keycloak Configuration
 KEYCLOAK_HOST = os.environ.get('KEYCLOAK_HOST', 'http://localhost:8080')

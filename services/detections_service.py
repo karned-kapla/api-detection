@@ -1,10 +1,18 @@
+from common_api.middlewares.v1.database_middleware import check_repo
 from fastapi import HTTPException
-from config import KAFKA_TOPIC, URL_API_GATEWAY
+from config import KAFKA_TOPIC, MS_SECRET_TTL
 from models.detection_model import DetectionCreate, DetectionCreateDatabase, DetectionRead, DetectionUpdate
 from common_api.utils.v0 import get_state_repos
+
+from repositories import get_repositories
 from utils.kafka_util import KafkaProducer
 import secrets
 import string
+import json
+
+from common_api.services.v0 import Logger, get_redis_api_db
+
+logger = Logger()
 
 def generate_secret(length=32):
     alphabet = string.ascii_letters + string.digits  # a-zA-Z0-9
@@ -23,6 +31,19 @@ def service_create_detection(request, detection: DetectionCreate) -> str:
 
         if not isinstance(detection_uuid, str):
             raise TypeError("The method service_create_detection did not return a str.")
+
+        r = get_redis_api_db()
+        cache_key = f"{request.state.licence_uuid}_database"
+        credential = r.get(cache_key)
+
+        payload = {
+            "credential": credential,
+            "licence_uuid": request.state.licence_uuid,
+            "entity_uuid": request.state.entity_uuid
+        }
+
+        cache_key = f"context_{detection.secret}"
+        r.set(cache_key, json.dumps(payload), ex=MS_SECRET_TTL)
 
         producer = KafkaProducer()
         producer.send_message(
@@ -58,7 +79,17 @@ def service_read_detection(request, uuid: str) -> DetectionRead:
 
 def service_update_detection(request, detection_update: DetectionUpdate) -> None:
     try:
-        repos = get_state_repos(request)
+        logger.info(detection_update.secret)
+        r = get_redis_api_db()
+        cache_key = f"context_{detection_update.secret}"
+        payload = json.loads(r.get(cache_key))
+        repos = get_repositories(uri=payload.credential.get('uri'))
+        check_repo(repos)
+
+        setattr(request.state, 'licence_uuid', payload.licence_uuid)
+        setattr(request.state, 'entity_uuid', payload.entity_uuid)
+        setattr(request.state, 'repos', repos)
+
         existing_detection = repos.detection_repo.read_detection(detection_update.uuid)
 
         if not existing_detection:

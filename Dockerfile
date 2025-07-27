@@ -17,7 +17,8 @@ ENV PYTHONUNBUFFERED=True \
     PORT=8000 \
     WORKERS=1 \
     API_NAME=api-detection \
-    API_TAG_NAME=detections
+    API_TAG_NAME=detections \
+    MS_SECRET_TTL=3600
 
 ENV KEYCLOAK_HOST="" \
     KEYCLOAK_REALM="" \
