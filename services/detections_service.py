@@ -35,6 +35,8 @@ def service_create_detection(request, detection: DetectionCreate) -> str:
         r = get_redis_api_db()
         cache_key = f"{request.state.licence_uuid}_database"
         credential = r.get(cache_key)
+        json_string = credential.replace("'", "\"")
+        credential = json.loads(json_string)
 
         payload = {
             "credential": credential,
@@ -79,15 +81,15 @@ def service_read_detection(request, uuid: str) -> DetectionRead:
 
 def service_update_detection(request, detection_update: DetectionUpdate) -> None:
     try:
-        logger.info(detection_update.secret)
         r = get_redis_api_db()
         cache_key = f"context_{detection_update.secret}"
         payload = json.loads(r.get(cache_key))
-        repos = get_repositories(uri=payload.credential.get('uri'))
+        credential = payload["credential"]
+        repos = get_repositories(uri=credential['uri'])
         check_repo(repos)
 
-        setattr(request.state, 'licence_uuid', payload.licence_uuid)
-        setattr(request.state, 'entity_uuid', payload.entity_uuid)
+        setattr(request.state, 'licence_uuid', payload['licence_uuid'])
+        setattr(request.state, 'entity_uuid', payload['entity_uuid'])
         setattr(request.state, 'repos', repos)
 
         existing_detection = repos.detection_repo.read_detection(detection_update.uuid)
